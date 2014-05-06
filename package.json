@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "gendoc": "./node_modules/yuidocjs/lib/cli.js .",
+    "viewdoc": "./node_modules/yuidocjs/lib/cli.js . --server 4000",
+    "test": "./node_modules/mocha/bin/mocha"
+  },
+  "devDependencies": {
+    "yuidocjs": "^0.3.50",
+    "mocha": "^1.18.2",
+    "expect.js": "^0.3.1"
+  }
+}
