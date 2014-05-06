@@ -1,0 +1,1 @@
+This is an implementation of the [Go-Back-N](http://en.wikipedia.org/wiki/Go-Back-N_ARQ) protocol for Node.js.
