@@ -1,5 +1,6 @@
 var helpers = require('./helpers');
 var constants = require('./constants');
+var PendingPacket = require('./PendingPacket');
 
 /**
  * An abstraction of sending raw UDP packets using the Go-Back-N protocol.
@@ -11,7 +12,7 @@ module.exports = Sender;
 function Sender() {
   this._windows = [];
   this._sending = null;
-  this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
+  //
 }
 
 /**
@@ -21,7 +22,7 @@ function Sender() {
  * @method
  */
 Sender.prototype.send = function (data) {
-  var chunks = helpers.splitArrayLike(data, 512);
+  var chunks = helpers.splitArrayLike(data, constants.UDP_SAFE_SEGMENT_SIZE);
   var windows = chunks.splitArrayLike(chunks, constants.WINDOW_SIZE);
   this._windows = this._windows.concat(windows);
   this._push();
@@ -32,15 +33,19 @@ Sender.prototype.send = function (data) {
  */
 Sender.prototype._push = function () {
   if (!this._sending) {
-    var toSend = this._window.unshift().map(function (data) {
-
+    this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
+    var toSend = this._window.unshift().map(function (data, i) {
+      return new PendingPacket(new Packet(i + this.baseSequenceNumber, data));
     });
-    this._sending = this._window.unshift();
+    this._sending = toSend;
   }
 }
 
 /**
- * Verifies whether or not the acknowledgement number is in fact
+ * Verifies whether or not the acknowledgement number is within the Window.
+ *
+ * @class Sender
+ * @method
  */
 Sender.prototype.verifyAcknowledgement = function (sequenceNumber) {
   throw new Error('Not yet implemented');
