@@ -66,6 +66,15 @@ LinkedList.prototype.currentValue = function () {
   return this._currentNode.value;
 };
 
+LinkedList.prototype.nextValue = function () {
+  if (!this._currentNode) {
+    throw new Error('There aren\'t any nodes on the list.');
+  } else if (!this._currentNode._childNode) {
+    throw new Error('There is only one element on the list.');
+  }
+  return this._currentNode._childNode.value;
+};
+
 LinkedList.prototype._insert = function (parentNode, object) {
   if (!parentNode._childNode) {
     parentNode._childNode = new Node(object);

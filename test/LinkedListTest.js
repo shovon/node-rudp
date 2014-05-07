@@ -43,4 +43,16 @@ describe('LinkedList', function () {
       expect(list._currentNode).to.be(null);
     });
   });
+
+  describe('#nextValue', function () {
+    it('should be able to get the current node\'s child node\'s value', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      expect(list.nextValue()).to.be(2);
+    });
+  });
 });
