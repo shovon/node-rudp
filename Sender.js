@@ -2,6 +2,8 @@ var helpers = require('./helpers');
 var constants = require('./constants');
 var PendingPacket = require('./PendingPacket');
 
+// TODO: the sender should never send acknowledgement or finish packets.
+
 /**
  * An abstraction of sending raw UDP packets using the Go-Back-N protocol.
  *
@@ -12,7 +14,6 @@ module.exports = Sender;
 function Sender() {
   this._windows = [];
   this._sending = null;
-  //
 }
 
 /**
@@ -35,7 +36,7 @@ Sender.prototype._push = function () {
   if (!this._sending) {
     this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
     var toSend = this._window.unshift().map(function (data, i) {
-      return new PendingPacket(new Packet(i + this.baseSequenceNumber, data));
+      return new PendingPacket(new Packet(i + this.baseSequenceNumber, data, !!i));
     });
     this._sending = toSend;
   }

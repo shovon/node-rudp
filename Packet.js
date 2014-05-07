@@ -31,6 +31,12 @@ function Packet(sequenceNumber, payload, synchronize) {
   }
 };
 
+Packet.createAcknowledgementPacket = function (sequenceNumber) {
+  var packet = new Packet(sequenceNumber, new Buffer(0), false);
+  packet._acknowledgement = true;
+  return packet;
+};
+
 Packet.prototype.getVersionNumber = function () {
   return this._versionNumber;
 };
