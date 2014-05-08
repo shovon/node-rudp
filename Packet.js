@@ -7,7 +7,7 @@ var buffertools = require('buffertools');
  * @constructor
  */
 module.exports = Packet;
-function Packet(sequenceNumber, payload, synchronize) {
+function Packet(sequenceNumber, payload, synchronize, reset) {
   this._versionNumber = 0;
 
   if (sequenceNumber instanceof Buffer) {
@@ -20,6 +20,7 @@ function Packet(sequenceNumber, payload, synchronize) {
     this._acknowledgement = !!(bools & 0x80);
     this._synchronize     = !!(bools & 0x40);
     this._finish          = !!(bools & 0x20);
+    this._reset           = !!(bools & 0x10);
 
     this._sequenceNumber = segment.readUInt8(offset); offset++;
     this._payload = new Buffer(segment.length - offset);
@@ -28,6 +29,7 @@ function Packet(sequenceNumber, payload, synchronize) {
     this._acknowledgement = false;
     this._synchronize = !!synchronize;
     this._finish = false;
+    this._reset = !!reset;
     this._sequenceNumber = sequenceNumber;
     this._payload = payload;
   }
@@ -63,6 +65,10 @@ Packet.prototype.getPayload = function () {
   return this._payload;
 };
 
+Packet.prototype.getIsReset = function () {
+  return this._reset;
+};
+
 /**
  * Get a byte array based on the meta data.
  *
@@ -77,7 +83,8 @@ Packet.prototype.toBuffer = function () {
   var bools = 0 + (
     (this._acknowledgement && 0x80) |
     (this._synchronize     && 0x40) |
-    (this._finish          && 0x20)
+    (this._finish          && 0x20) |
+    (this._reset           && 0x10)
   );
 
   retval.writeUInt8(bools, offset); offset++;
@@ -92,12 +99,25 @@ Packet.prototype.clone = function () {
   return new Packet(this.toBuffer());
 };
 
+Packet.prototype.toObject = function () {
+  return {
+    version: this.getVersionNumber(),
+    acknowledgement: this.getIsAcknowledgement(),
+    synchronize: this.getIsSynchronize(),
+    finish: this.getIsFinish(),
+    reset: this.getIsReset(),
+    sequenceNumber: this.getSequenceNumber(),
+    payload: this.getPayload().toString('base64')
+  }
+};
+
 Packet.prototype.equals = function (packet) {
   return (
     this.getVersionNumber() === packet.getVersionNumber() &&
     this.getIsAcknowledgement() === packet.getIsAcknowledgement() &&
     this.getIsSynchronize() === packet.getIsSynchronize() &&
     this.getIsFinish() === packet.getIsFinish() &&
+    this.getIsReset() === packet.getIsReset() &&
     this.getSequenceNumber() === packet.getSequenceNumber() &&
     buffertools.compare(this.getPayload(), packet.getPayload()) === 0
   )

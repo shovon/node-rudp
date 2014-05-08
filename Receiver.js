@@ -29,7 +29,7 @@ Receiver.prototype.receive = function (packet) {
   // TODO: ignore packets that have a sequence number less than the next
   // sequence number
 
-  if (packet.getIsSynchronize()) {
+  if (packet.getIsSynchronize() && (!this._synced || packet.getSequenceNumber() < this._syncSequenceNumber)) {
     // This is the beginning of the stream.
     
     // Send the packet upstream, send acknowledgement packet to end host, and
@@ -39,6 +39,10 @@ Receiver.prototype.receive = function (packet) {
     this._packets.insert(packet);
     this._nextSequenceNumber = packet.getSequenceNumber() + 1;
     this._synced = true;
+    this._syncSequenceNumber = packet.getSequenceNumber();
+
+    // We're done.
+    return;
 
   } else if (!this._synced) {
     // If we are not synchronized with sender, then this means that we should
@@ -65,8 +69,13 @@ Receiver.prototype.receive = function (packet) {
   // packet is the expected packet number. If it is, then start the
   // acknowledgement process anew.
 
-  this._packets.insert(packet);
-  this._pushIfExpectedSequence(packet);
+  var result = this._packets.insert(packet);
+  // console.log('Packet: %s. Result %s', packet.getPayload().toString('utf8'), result);
+  if (result === LinkedList.InsertionResult.INSERTED) {
+    this._pushIfExpectedSequence(packet);
+  } else if (result === LinkedList.InsertionResult.EXISTS) {
+    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+  }
 };
 
 Receiver.prototype._pushIfExpectedSequence = function (packet) {

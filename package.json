@@ -7,7 +7,8 @@
   "devDependencies": {
     "yuidocjs": "^0.3.50",
     "mocha": "^1.18.2",
-    "expect.js": "^0.3.1"
+    "expect.js": "^0.3.1",
+    "sinon": "^1.9.1"
   },
   "dependencies": {
     "buffertools": "^2.1.2"

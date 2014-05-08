@@ -20,7 +20,8 @@ describe('Packet', function () {
     it('should clone the packet into two entirely different objects, yet have identical values. Equals should be able to determine equality, in-spite of different objects references', function () {
       var sequenceNumber = 10;
       var isSynchronize = true;
-      var packet = new Packet(sequenceNumber, new Buffer('test'), isSynchronize);
+      var isReset = true;
+      var packet = new Packet(sequenceNumber, new Buffer('test'), isSynchronize, isReset);
       var packetCopy = packet.clone();
       expect(packet).to.not.be(packetCopy);
       expect(packet.equals(packetCopy)).to.be(true);

@@ -23,9 +23,9 @@ function LinkedList(orderBy) {
 }
 
 var InsertionResult = LinkedList.InsertionResult = {
-  INSERTED: 0,
-  EXISTS: 1,
-  FAILED: 2
+  INSERTED: 'inserted',
+  EXISTS: 'exists',
+  FAILED: 'failed'
 };
 
 LinkedList.prototype.insert = function (object) {
@@ -97,8 +97,7 @@ LinkedList.prototype._insert = function (parentNode, object) {
     parentNode._childNode = node;
     return InsertionResult.INSERTED;
   } else if (order >= 1) {
-    this._insert(parentNode._childNode, object);
-    return InsertionResult.INSERTED;
+    return this._insert(parentNode._childNode, object);
   } else if (order === 0) {
     return InsertionResult.EXISTS;
   }
