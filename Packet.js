@@ -1,3 +1,5 @@
+var buffertools = require('buffertools');
+
 /**
  * Represents a packet.
  *
@@ -85,3 +87,18 @@ Packet.prototype.toBuffer = function () {
 
   return retval;
 }
+
+Packet.prototype.clone = function () {
+  return new Packet(this.toBuffer());
+};
+
+Packet.prototype.equals = function (packet) {
+  return (
+    this.getVersionNumber() === packet.getVersionNumber() &&
+    this.getIsAcknowledgement() === packet.getIsAcknowledgement() &&
+    this.getIsSynchronize() === packet.getIsSynchronize() &&
+    this.getIsFinish() === packet.getIsFinish() &&
+    this.getSequenceNumber() === packet.getSequenceNumber() &&
+    buffertools.compare(this.getPayload(), packet.getPayload()) === 0
+  )
+};

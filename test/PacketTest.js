@@ -16,4 +16,14 @@ describe('Packet', function () {
       expect(generatedPacket.getPayload().toString('utf8')).to.be('test');
     });
   });
+  describe('#clone() and #equals()', function () {
+    it('should clone the packet into two entirely different objects, yet have identical values. Equals should be able to determine equality, in-spite of different objects references', function () {
+      var sequenceNumber = 10;
+      var isSynchronize = true;
+      var packet = new Packet(sequenceNumber, new Buffer('test'), isSynchronize);
+      var packetCopy = packet.clone();
+      expect(packet).to.not.be(packetCopy);
+      expect(packet.equals(packetCopy)).to.be(true);
+    });
+  });
 });

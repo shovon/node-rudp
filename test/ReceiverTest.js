@@ -4,6 +4,8 @@ var Packet = require('../Packet');
 var helpers = require('../helpers');
 
 describe('Receiver', function () {
+  // TODO: test whether the receiver is able to send acknowledgement packets.
+
   describe('#_closed, #end() and event end', function () {
     it('should trigger an event called end', function (done) {
       var receiver = new Receiver();
@@ -66,7 +68,7 @@ describe('Receiver', function () {
 
     // TODO: test this.
 
-    xit('should handle duplicate packets just fine', function (done) {
+    it.only('should handle duplicate synchronize packets just fine', function (done) {
       throw new Error('Not yet spec\'d');
       var receiver = new Receiver({
         sendPacket: function () {} // TODO: test whether this function is called.
@@ -76,6 +78,8 @@ describe('Receiver', function () {
         return new Packet(i, new Buffer(character), i === 0);
       });
       var first = packets.shift();
+      var firstCopy = first.clone();
+      helpers.push(firstCopy);
       helpers.shuffle(packets);
       packets.unshift(first);
       expect(packets.map(function (element) {
