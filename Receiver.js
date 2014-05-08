@@ -29,7 +29,7 @@ Receiver.prototype.receive = function (packet) {
   // TODO: ignore packets that have a sequence number less than the next
   // sequence number
 
-  if (packet.getIsSynchronize() && (!this._synced || packet.getSequenceNumber() < this._syncSequenceNumber)) {
+  if (packet.getIsSynchronize() && !this._synced) {
     // This is the beginning of the stream.
     
     // Send the packet upstream, send acknowledgement packet to end host, and
@@ -41,20 +41,30 @@ Receiver.prototype.receive = function (packet) {
     this._synced = true;
     this._syncSequenceNumber = packet.getSequenceNumber();
 
+    if (packet.getIsReset()) {
+      this._synced = false;
+    }
+
     // We're done.
     return;
 
+  } else if (packet.getIsReset()) {
+    this._synced = false;
   } else if (!this._synced) {
     // If we are not synchronized with sender, then this means that we should
     // wait for the end host to send a synchronization packet.
 
     // We are done.
     return;
+  } else if (packet.getSequenceNumber() < this._syncSequenceNumber) {
+    // This is a troll packet. Ignore it.
+
+    return;
   } else if (
     packet.getSequenceNumber() >=
     this._packets.currentValue().getSequenceNumber() + constants.WINDOW_SIZE
   ) {
-    // This means that the next packet received is not 
+    // This means that the next packet received is not within the window size.
 
     this.emit('_window_size_exceeded');
     return;
@@ -70,7 +80,6 @@ Receiver.prototype.receive = function (packet) {
   // acknowledgement process anew.
 
   var result = this._packets.insert(packet);
-  // console.log('Packet: %s. Result %s', packet.getPayload().toString('utf8'), result);
   if (result === LinkedList.InsertionResult.INSERTED) {
     this._pushIfExpectedSequence(packet);
   } else if (result === LinkedList.InsertionResult.EXISTS) {
