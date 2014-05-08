@@ -1,15 +1,12 @@
 var LinkedList = require('../LinkedList');
 var expect = require('expect.js');
+var helpers = require('../helpers');
 
 describe('LinkedList', function () {
   describe('#insert, #seek, #currentValue, #resetIndex', function () {
     it('should be able to insert elements of an unordered list, and get back an ordered list', function () {
-      function shuffle(o){
-        for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-        return o;
-      };
       var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var shuffled = shuffle(arr.slice());
+      var shuffled = helpers.shuffle(arr.slice());
       expect(shuffled).to.not.eql(arr);
       var list = new LinkedList(function (a, b){ 
         return a - b;
@@ -43,7 +40,6 @@ describe('LinkedList', function () {
       expect(list._currentNode).to.be(null);
     });
   });
-
   describe('#nextValue', function () {
     it('should be able to get the current node\'s child node\'s value', function () {
       var list = new LinkedList(function (a, b) {
@@ -53,6 +49,79 @@ describe('LinkedList', function () {
         list.insert(element);
       });
       expect(list.nextValue()).to.be(2);
+    });
+  });
+  describe('#hasNext', function () {
+    it('should return false when the current node is at the head of the list', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      while (list.seek()) {}
+      expect(list.hasNext()).to.be(false);
+    });
+    it('should return true when the current node is not at the head of the list', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      expect(list.hasNext()).to.be(true);
+      list.seek();
+      expect(list.hasNext()).to.be(true);
+    });
+  });
+  describe('#hasValue', function () {
+    it('should return false when there aren\'t anything on the list', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      expect(list.hasValue()).to.be(false);
+    });
+    it('should return true when there is one thing on the list', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      list.insert(1);
+      expect(list.hasValue()).to.be(true);
+    });
+    it('should return true when there are many things on the list', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      expect(list.hasValue()).to.be(true);
+    });
+    it('should return false when there are\'t anything on the list, *after* `clear` has been called', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      expect(list.hasValue()).to.be(true);
+      list.clear();
+      expect(list.hasValue()).to.be(false);
+    });
+    it('should return true when there is something on the list, *after* `clear` has been called and elements have been added', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      expect(list.hasValue()).to.be(true);
+      list.clear();
+      expect(list.hasValue()).to.be(false);
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      expect(list.hasValue()).to.be(true);
     });
   });
 });

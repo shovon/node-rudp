@@ -2,6 +2,7 @@ var LinkedList = require('./LinkedList');
 var constants = require('./constants');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var Packet = require('./Packet');
 
 // TODO: have this be a DuplexStream instead of an EventEmitter.
 // TODO: the Receiver should never send raw packets to the end host. It should
@@ -26,61 +27,62 @@ Receiver.prototype.receive = function (packet) {
   }
 
   // TODO: ignore packets that have a sequence number less than the next
-  // next sequence number
+  // sequence number
 
-  if (packet.synchronize) {
+  if (packet.getIsSynchronize()) {
     // This is the beginning of the stream.
-
-    // This must be set to true, otherwise, the packet will not be accepted.
+    
+    // Send the packet upstream, send acknowledgement packet to end host, and
+    // increment the next expected packet.
+    this.emit('data', packet.getPayload());
+    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+    this._packets.insert(packet);
+    this._nextSequenceNumber = packet.getSequenceNumber() + 1;
     this._synced = true;
 
-    // Clear all existing packets.
-    this._packets.clear();
-
-    // When the next packet arrives, it had better be the following sequence
-    // number, otherewise, we won't be sending an acknowledgment packet for it
-    // until a sequence number preceding it has been sent.
-    this._nextSequenceNumber = packet.getSequenceNumber() + 1;
-    this._notifyData(this._packets.currentValue());
-    
-    // We're done.
-    return;
   } else if (!this._synced) {
+    // If we are not synchronized with sender, then this means that we should
+    // wait for the end host to send a synchronization packet.
+
+    // We are done.
     return;
   } else if (
-    packet.getSequenceNumber() >
+    packet.getSequenceNumber() >=
     this._packets.currentValue().getSequenceNumber() + constants.WINDOW_SIZE
   ) {
-    // This is to prevent stack overflows.
+    // This means that the next packet received is not 
 
+    this.emit('_window_size_exceeded');
     return;
   }
 
-  // Insert the packet, and see if the data can be pushed upstream.
+  // This means that we should simply insert the packet. If the packet's
+  // sequence number is the one that we were expecting, then send it upstream,
+  // acknowledge the packet, and increment the next expected sequence number.
+  //
+  // Once acknowledged, check to see if there aren't any more pending packets
+  // after the current packet. If there are, then check to see if the next
+  // packet is the expected packet number. If it is, then start the
+  // acknowledgement process anew.
+
   this._packets.insert(packet);
-  this._push();
+  this._pushIfExpectedSequence(packet);
 };
 
-Receiver.prototype._notifyData = function (packet) {
-  this.emit('data', packet.getPayload());
+Receiver.prototype._pushIfExpectedSequence = function (packet) {
+
+  if (packet.getSequenceNumber() === this._nextSequenceNumber) {
+    this.emit('data', packet.getPayload());
+    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+    this._nextSequenceNumber++;
+    this._packets.seek();
+    if (this._packets.hasNext()) {
+      this._pushIfExpectedSequence(this._packets.nextValue());
+    }
+  }
 };
 
 Receiver.prototype.end = function () {
   this._closed = true;
   this.emit('end');
-};
-
-Receiver.prototype._push = function () {
-  var packet = this._packets.nextValue();
-  var sequenceNumber = packet.getSequenceNumber()
-  if (sequenceNumber === this._nextSequenceNumber) {
-    this._notifyData(packet);
-    this._packets.seek();
-    this._nextSequenceNumber++;
-    // [1] There is a potential that the receiver can send raw packets by
-    // mistake. One way to avoid this is to have the constructor only accept
-    // a class that can only send acknowledgement packets.
-    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(sequenceNumber));
-    this._push();
-  }
 };

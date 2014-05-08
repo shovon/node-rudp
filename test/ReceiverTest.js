@@ -1,6 +1,7 @@
 var Receiver = require('../Receiver');
 var expect = require('expect.js');
 var Packet = require('../Packet');
+var helpers = require('../helpers');
 
 describe('Receiver', function () {
   describe('#_closed, #end() and event end', function () {
@@ -15,8 +16,10 @@ describe('Receiver', function () {
     });
   });
   describe('#receive', function () {
-    it('a single packet should be delivered upstream just fine', function (done) {
-      var receiver = new Receiver();
+    it('should deliver a single packet upstream just fine', function (done) {
+      var receiver = new Receiver({
+        sendPacket: function () {}
+      });
       var dummyData = 'Hello, World! This is a test!';
       var compiled = '';
       receiver.on('data', function (data) {
@@ -27,6 +30,35 @@ describe('Receiver', function () {
         done();
       });
       receiver.receive(new Packet(0, new Buffer(dummyData), true));
+      receiver.end();
+    });
+
+    it('should deliver multiple packets upstream just fine, and in order', function (done) {
+      var receiver = new Receiver({
+        sendPacket: function () {} // TODO: test whether this function is called.
+      });
+      var dummyData = 'Hello, World! HA';
+      var packets = dummyData.split('').map(function (character, i) {
+        return new Packet(i, new Buffer(character), i === 0);
+      });
+      var first = packets.shift();
+      helpers.shuffle(packets);
+      packets.unshift(first);
+      expect(packets.map(function (element) {
+        return element.getPayload().toString('utf8');
+      }).join('')).to.not.be(dummyData);
+      var compiled = '';
+      receiver.on('data', function (data) {
+        compiled += data.toString('utf8');
+      });
+      receiver.on('end', function () {
+        expect(compiled).to.be(dummyData);
+        done();
+      });
+      packets.forEach(function (packet) {
+        receiver.receive(packet);
+      });
+      receiver.end();
     });
   });
 });
