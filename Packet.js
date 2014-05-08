@@ -8,13 +8,10 @@ var buffertools = require('buffertools');
  */
 module.exports = Packet;
 function Packet(sequenceNumber, payload, synchronize, reset) {
-  this._versionNumber = 0;
-
   if (sequenceNumber instanceof Buffer) {
     var segment = sequenceNumber;
 
     var offset = 0;
-    this._versionNumber = segment.readUInt8(offset); offset++;
 
     bools = segment.readUInt8(offset); offset++;
     this._acknowledgement = !!(bools & 0x80);
@@ -39,10 +36,6 @@ Packet.createAcknowledgementPacket = function (sequenceNumber) {
   var packet = new Packet(sequenceNumber, new Buffer(0), false);
   packet._acknowledgement = true;
   return packet;
-};
-
-Packet.prototype.getVersionNumber = function () {
-  return this._versionNumber;
 };
 
 Packet.prototype.getIsAcknowledgement = function () {
@@ -76,9 +69,7 @@ Packet.prototype.getIsReset = function () {
  */
 Packet.prototype.toBuffer = function () {
   var offset = 0;
-  var retval = new Buffer(3 + this._payload.length);
-
-  retval.writeUInt8(this._versionNumber, offset); offset++;
+  var retval = new Buffer(2 + this._payload.length);
 
   var bools = 0 + (
     (this._acknowledgement && 0x80) |
@@ -113,7 +104,6 @@ Packet.prototype.toObject = function () {
 
 Packet.prototype.equals = function (packet) {
   return (
-    this.getVersionNumber() === packet.getVersionNumber() &&
     this.getIsAcknowledgement() === packet.getIsAcknowledgement() &&
     this.getIsSynchronize() === packet.getIsSynchronize() &&
     this.getIsFinish() === packet.getIsFinish() &&

@@ -165,18 +165,43 @@ describe('Receiver', function () {
       receiver.end();
     });
 
-    xit('should be able to handle resets and synchronization', function (done) {
+    it('should be able to handle resets and synchronization', function (done) {
       var spySender = {
         sendPacket: sinon.spy()
       };
       var receiver = new Receiver(spySender);
-      var expected = require()
-      var dummyData = helpers.splitArrayLike('Hello, World! This is a test!', 16);
+      var expected = 'Hello, World! This is a test!';
+      var dummyData = helpers.splitArrayLike(expected, 16);
       var windows = dummyData.map(function (window, i) {
         var withPackets = window.split('').map(function (character, j) {
           return new Packet(j + 64 / (i + 1), new Buffer(character), j === 0, j === window.length - 1);
         });
+        var tail = withPackets.shift();
+        var head = withPackets.pop();
+        helpers.shuffle(withPackets);
+        withPackets.unshift(tail);
+        withPackets.push(head);
+        return withPackets;
       });
+      var resetSpy = sinon.spy();
+      receiver.on('_reset', function () {
+        resetSpy();
+      });
+      var compiled = '';
+      receiver.on('data', function (data) {
+        compiled += data.toString('utf8');
+      });
+      receiver.on('end', function () {
+        expect(compiled).to.be(expected);
+        done();
+      });
+      windows.forEach(function (window) {
+        window.forEach(function (packet) {
+          // console.log(packet.getPayload().toString('utf8'));
+          receiver.receive(packet);
+        });
+      });
+      receiver.end();
     });
   });
 });

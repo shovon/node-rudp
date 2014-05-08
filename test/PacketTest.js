@@ -8,7 +8,6 @@ describe('Packet', function () {
       var isSynchronize = true
       var packet = new Packet(sequenceNumber, new Buffer('test'), isSynchronize);
       var generatedPacket = new Packet(packet.toBuffer());
-      expect(generatedPacket.getVersionNumber()).to.be(0);
       expect(generatedPacket.getIsAcknowledgement()).to.be(false);
       expect(generatedPacket.getIsSynchronize()).to.be(isSynchronize);
       expect(generatedPacket.getIsFinish()).to.be(false);

@@ -124,4 +124,16 @@ describe('LinkedList', function () {
       expect(list.hasValue()).to.be(true);
     });
   });
+  describe('#toArray', function () {
+    it('should take the element in the list and turn it into an array', function () {
+      var list = new LinkedList(function (a, b) {
+        return a - b;
+      });
+      [1, 2, 3, 4, 5].forEach(function (element) {
+        list.insert(element);
+      });
+      var arr = list.toArray().map(function (a) { return a.toString(); }).join('');
+      expect(arr).to.be('12345');
+    });
+  });
 });

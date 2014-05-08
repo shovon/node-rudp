@@ -83,6 +83,15 @@ LinkedList.prototype.hasNext = function () {
   return !!this._currentNode._childNode;
 };
 
+LinkedList.prototype.toArray = function () {
+  return this._toArray(this, [])
+};
+
+LinkedList.prototype._toArray = function (node, accum) {
+  if (!node._childNode) { return accum; }
+  return this._toArray(node._childNode, accum.concat([node._childNode.value]));
+};
+
 LinkedList.prototype._insert = function (parentNode, object) {
   if (!parentNode._childNode) {
     parentNode._childNode = new Node(object);

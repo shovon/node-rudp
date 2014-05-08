@@ -31,9 +31,10 @@ Receiver.prototype.receive = function (packet) {
 
   if (packet.getIsSynchronize() && !this._synced) {
     // This is the beginning of the stream.
-    
+
     // Send the packet upstream, send acknowledgement packet to end host, and
     // increment the next expected packet.
+    this._packets.clear();
     this.emit('data', packet.getPayload());
     this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
     this._packets.insert(packet);
@@ -42,6 +43,7 @@ Receiver.prototype.receive = function (packet) {
     this._syncSequenceNumber = packet.getSequenceNumber();
 
     if (packet.getIsReset()) {
+      this.emit('_reset');
       this._synced = false;
     }
 
@@ -49,6 +51,7 @@ Receiver.prototype.receive = function (packet) {
     return;
 
   } else if (packet.getIsReset()) {
+    this.emit('_reset');
     this._synced = false;
   } else if (!this._synced) {
     // If we are not synchronized with sender, then this means that we should
@@ -88,7 +91,6 @@ Receiver.prototype.receive = function (packet) {
 };
 
 Receiver.prototype._pushIfExpectedSequence = function (packet) {
-
   if (packet.getSequenceNumber() === this._nextSequenceNumber) {
     this.emit('data', packet.getPayload());
     this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
