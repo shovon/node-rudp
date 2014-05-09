@@ -32,6 +32,10 @@ Receiver.prototype.receive = function (packet) {
   if (packet.getIsSynchronize() && !this._synced) {
     // This is the beginning of the stream.
 
+    if (packet.getSequenceNumber() === this._syncSequenceNumber) {
+      return;
+    }
+
     // Send the packet upstream, send acknowledgement packet to end host, and
     // increment the next expected packet.
     this._packets.clear();

@@ -193,13 +193,108 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(expected);
+        expect(spySender.sendPacket.callCount).to.be(expected.length);
         done();
       });
       windows.forEach(function (window) {
         window.forEach(function (packet) {
-          // console.log(packet.getPayload().toString('utf8'));
           receiver.receive(packet);
         });
+      });
+      receiver.end();
+    });
+
+    it('should handle duplicate reset packets', function (done) {
+      var spySender = {
+        sendPacket: sinon.spy()
+      };
+      var receiver = new Receiver(spySender);
+      var expected = 'Hello, World! This is a test!';
+      var dummyData = helpers.splitArrayLike(expected, 16);
+      var windows = dummyData.map(function (window, i) {
+        var withPackets = window.split('').map(function (character, j) {
+          return new Packet(j + 64 / (i + 1), new Buffer(character), j === 0, j === window.length - 1);
+        });
+        var tail = withPackets.shift();
+        var head = withPackets.pop();
+        var headCopy = head.clone();
+        helpers.shuffle(withPackets);
+        withPackets.unshift(tail);
+        withPackets.push(head);
+        withPackets.push(headCopy);
+        return withPackets;
+      });
+      var resetSpy = sinon.spy();
+      receiver.on('_reset', function () {
+        resetSpy();
+      });
+      var compiled = '';
+      receiver.on('data', function (data) {
+        compiled += data.toString('utf8');
+      });
+      receiver.on('end', function () {
+        expect(compiled).to.be(expected);
+        expect(spySender.sendPacket.callCount).to.be(expected.length + 2);
+        done();
+      });
+      windows.forEach(function (window) {
+        window.forEach(function (packet) {
+          receiver.receive(packet);
+        });
+      });
+      receiver.end();
+    });
+
+    it('should be able to accept singleton windows', function (done) {
+      var spySender = {
+        sendPacket: sinon.spy()
+      };
+      var receiver = new Receiver(spySender);
+      var expected = 'Hello, World!';
+      var dummyData = expected.split('');
+      var windows = dummyData.map(function (packet, i) {
+        return new Packet(i, new Buffer(packet), true, true);
+      });
+      var compiled = '';
+      receiver.on('data', function (data) {
+        compiled += data;
+      });
+      receiver.on('end', function () {
+        expect(compiled).to.be(expected);
+        done();
+      });
+      windows.forEach(function (packet) {
+        receiver.receive(packet);
+      });
+      receiver.end();
+    });
+
+    it('should be able to accept duplicate singletons', function (done) {
+      var spySender = {
+        sendPacket: sinon.spy()
+      };
+      var receiver = new Receiver(spySender);
+      var expected = 'Hello, World!';
+      var dummyData = expected.split('');
+      var windows = dummyData.map(function (packet, i) {
+        return new Packet(i, new Buffer(packet), true, true);
+      });
+      var index = Math.floor(Math.random() * windows.length);
+      var duplicate = windows[index].clone();
+      var left = windows.slice(0, index);
+      var right = windows.slice(index, windows.length);
+      left.push(duplicate);
+      windows = left.concat(right);
+      var compiled = '';
+      receiver.on('data', function (data) {
+        compiled += data;
+      });
+      receiver.on('end', function () {
+        expect(compiled).to.be(expected);
+        done();
+      });
+      windows.forEach(function (packet) {
+        receiver.receive(packet);
       });
       receiver.end();
     });
