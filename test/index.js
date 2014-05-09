@@ -1,5 +1,5 @@
-require('./helpersTest');
-require('./SenderTest');
-require('./PacketTest');
-require('./LinkedListTest');
-require('./ReceiverTest');
+require('./unit/helpersTest');
+require('./unit/SenderTest');
+require('./unit/PacketTest');
+require('./unit/LinkedListTest');
+require('./unit/ReceiverTest');

@@ -1,6 +1,6 @@
-var LinkedList = require('../LinkedList');
+var LinkedList = require('../../LinkedList');
 var expect = require('expect.js');
-var helpers = require('../helpers');
+var helpers = require('../../helpers');
 
 describe('LinkedList', function () {
   describe('#insert, #seek, #currentValue, #resetIndex', function () {

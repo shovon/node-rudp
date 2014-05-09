@@ -1,7 +1,7 @@
-var Receiver = require('../Receiver');
+var Receiver = require('../../Receiver');
 var expect = require('expect.js');
-var Packet = require('../Packet');
-var helpers = require('../helpers');
+var Packet = require('../../Packet');
+var helpers = require('../../helpers');
 var sinon = require('sinon');
 
 describe('Receiver', function () {
