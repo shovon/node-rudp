@@ -1,8 +1,9 @@
 var Packet = require('./Packet');
 var Connection = require('./Connection');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
-// TODO: have this be a 
-
+module.exports = Server;
 function Server(socket) {
   this._connections = {};
   var self = this;
@@ -19,3 +20,5 @@ function Server(socket) {
     connection.receive(packet);
   });
 };
+
+util.inherits(Server, EventEmitter);

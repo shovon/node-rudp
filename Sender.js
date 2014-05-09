@@ -1,13 +1,16 @@
 var helpers = require('./helpers');
 var constants = require('./constants');
 var PendingPacket = require('./PendingPacket');
+var Packet = require('./Packet');
 var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 // TODO: the sender should never send acknowledgement or finish packets.
 
 function Window(packets) {
   this._packets = packets;
 }
+util.inherits(Window, EventEmitter);
 
 Window.prototype.send = function () {
   // Our packets to send.
@@ -98,7 +101,7 @@ function Sender() {
  */
 Sender.prototype.send = function (data) {
   var chunks = helpers.splitArrayLike(data, constants.UDP_SAFE_SEGMENT_SIZE);
-  var windows = chunks.splitArrayLike(chunks, constants.WINDOW_SIZE);
+  var windows = helpers.splitArrayLike(chunks, constants.WINDOW_SIZE);
   this._windows = this._windows.concat(windows);
   this._push();
 }

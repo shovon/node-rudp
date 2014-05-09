@@ -7,6 +7,7 @@ var constants = require('./constants');
  * @class PendingPacket
  * @constructor
  */
+module.exports = PendingPacket;
 function PendingPacket(packet, packetSender) {
   this._packet = packet;
   this._intervalID = setInterval(function () {
