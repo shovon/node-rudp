@@ -81,6 +81,14 @@ Window.prototype.send = function () {
   });
 };
 
+Window.prototype.verifyAcknowledgement = function (sequenceNumber) {
+  for (var i = 0; i < this._packets.length; i++) {
+    if (this._packets[i].getSequenceNumber() === sequenceNumber) {
+      this._packets[i].acknowledge();
+    }
+  }
+};
+
 /**
  * An abstraction of sending raw UDP packets using the Go-Back-N protocol.
  *
@@ -88,7 +96,8 @@ Window.prototype.send = function () {
  * @constructor
  */
 module.exports = Sender;
-function Sender() {
+function Sender(packetSender) {
+  this._packetSender = packetSender;
   this._windows = [];
   this._sending = null;
 }
@@ -100,8 +109,11 @@ function Sender() {
  * @method
  */
 Sender.prototype.send = function (data) {
+  console.log('Got data to send.');
   var chunks = helpers.splitArrayLike(data, constants.UDP_SAFE_SEGMENT_SIZE);
+  console.log('Got %s chunks', chunks.length);
   var windows = helpers.splitArrayLike(chunks, constants.WINDOW_SIZE);
+  console.log('Resulting in %s additional windows', windows.length);
   this._windows = this._windows.concat(windows);
   this._push();
 }
@@ -110,11 +122,14 @@ Sender.prototype.send = function (data) {
  * Pushes out the data to the remote host.
  */
 Sender.prototype._push = function () {
+  var self = this;
   if (!this._sending && this._windows.length) {
+    console.log('No pending windows. Push the window awaiting in the queue');
     this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
     var window = this._windows.shift()
     var toSend = new Window(window.map(function (data, i) {
-      return new PendingPacket(new Packet(i + this.baseSequenceNumber, data, !!i, i === window.length - 1));
+      var packet = new Packet(i + self._baseSequenceNumber, data, !!i, i === window.length - 1);
+      return new PendingPacket(packet, self._packetSender);
     }));
     this._sending = toSend;
     var self = this;
@@ -122,6 +137,7 @@ Sender.prototype._push = function () {
       self._sending = null;
       self._push();
     });
+    toSend.send();
   }
 }
 

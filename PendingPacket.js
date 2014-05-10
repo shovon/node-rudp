@@ -1,4 +1,6 @@
 var constants = require('./constants');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 /**
  * A placeholder for a packet that is awaiting a acknowledgement from the end
@@ -15,10 +17,13 @@ function PendingPacket(packet, packetSender) {
   }, constants.TIMEOUT);
 }
 
+util.inherits(PendingPacket, EventEmitter);
+
 PendingPacket.prototype.getSequenceNumber = function () {
   return this._packet.getSequenceNumber();
 };
 
-PendingPacket.prototype.finish = function () {
+PendingPacket.prototype.acknowledge = function () {
   clearInterval(this._intervalID);
+  this.emit('acknowledge');
 };

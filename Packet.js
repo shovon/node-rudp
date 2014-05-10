@@ -38,6 +38,12 @@ Packet.createAcknowledgementPacket = function (sequenceNumber) {
   return packet;
 };
 
+Packet.createFinishPacket = function () {
+  var packet = new Packet(0, new Buffer(0), false, false);
+  packet._finish = true;
+  return packet;
+};
+
 Packet.prototype.getIsAcknowledgement = function () {
   return this._acknowledgement;
 };

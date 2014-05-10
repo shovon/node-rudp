@@ -90,7 +90,7 @@ Receiver.prototype.receive = function (packet) {
   if (result === LinkedList.InsertionResult.INSERTED) {
     this._pushIfExpectedSequence(packet);
   } else if (result === LinkedList.InsertionResult.EXISTS) {
-    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+    this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
   }
 };
 

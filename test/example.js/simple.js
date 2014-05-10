@@ -4,7 +4,11 @@ var dgram = require('dgram');
 var serverSocket = dgram.createSocket('udp4');
 var clientSocket = dgram.createSocket('udp4');
 
+console.log('Initialized the sockets')
+
 serverSocket.bind(3000);
+
+console.log('Bound the server socket to port 3000');
 
 var server = new gobackn.Server(serverSocket);
 var client = new gobackn.Client(clientSocket, '127.0.0.1', 3000);
