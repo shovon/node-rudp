@@ -9,26 +9,28 @@ function Server(socket) {
   this._connections = {};
   var self = this;
   socket.on('message', function (message, rinfo) {
-    console.log('Got a message.');
+    // console.log('Got a message.');
     var addressKey = rinfo.address + rinfo.port;
     var connection;
     if (!self._connections[addressKey]) {
-      console.log('New client.');
+      // console.log('New client.');
       connection = new Connection(new PacketSender(socket, rinfo.address, rinfo.port));
       self._connections[addressKey] = connection;
-      this.emit('connection', connection);
+      self.emit('connection', connection);
     } else {
-      console.log('Old client.');
+      // console.log('Old client.');
       connection = self._connections[addressKey];
     }
     var packet = new Packet(message);
     if (packet.getIsFinish()){
       delete self._connections[addressKey];
     } else {
-      connection.receive(packet);
+      setImmediate(function () {
+        connection.receive(packet);
+      });
     }
   });
-  console.log('Listening for messages sent by clients.');
+  // console.log('Listening for messages sent by clients.');
 };
 
 util.inherits(Server, EventEmitter);

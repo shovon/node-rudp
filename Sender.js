@@ -20,12 +20,24 @@ Window.prototype.send = function () {
   // TODO: does this window class need to check whether or not the
   //   synchronization packet have the synchronization flag set to true?
   this._synchronizationPacket = pkts.shift();
-  // The final reset packet. It can equal to synchronization packet.
+  // The final reset packet. It can equal to the synchronization packet.
   // TODO: does this window class need to check whether or not the reset packet
-  //   have the reset flag set to true.
+  //   have the reset flag set to true?
   this._resetPacket = pkts.length ? pkts.pop() : this._synchronizationPacket
 
+  // This means that the reset packet's acknowledge event thrown will be
+  // different from that of the synchronization packet.
+  if (this._resetPacket !== this._synchronizationPacket) {
+    this._resetPacket.on('acknowledge', function () {
+      self.emit('done');
+    });
+  }
+
   var self = this;
+
+  // Will be used to handle the case when all non sync or reset packets have
+  // been acknowledged.
+  var emitter = new EventEmitter();
 
   this._synchronizationPacket.on('acknowledge', function () {
     // We will either notify the owning class that this window has finished
@@ -43,42 +55,32 @@ Window.prototype.send = function () {
       return;
     }
 
+    emitter.on('acknowledge', function () {
+      // This means that it is now time to send the reset packet.
+      self._resetPacket.send();
+    });
+
     // And if there are more than two packets in this window, then send all
     // other packets.
     pkts.forEach(function (packet) {
       packet.send();
     });
-  });
 
-  // This means that the reset packet's acknowledge event thrown will be
-  // different from that of the synchronization packet.
-  if (this._resetPacket !== this._synchronizationPacket) {
-    this._resetPacket.on('acknowledge', function () {
-      self.emit('done');
+    var acknowledged = 0;
+    pkts.forEach(function (packet) {
+      // TODO: optimize by not having the following anonymous function redefined
+      //   at every iteration.
+      packet.on('acknowledge', function () {
+        acknowledged++;
+        if (acknowledged === pkts.length) {
+          emitter.emit('acknowledge');
+        }
+      });
+      packet.send();
     });
-  }
-
-  // Will be used to handle the case when all non sync or reset packets have
-  // been acknowledged.
-  var emitter = new EventEmitter();
-
-  // This means that it is now time to send the reset packet.
-  emitter.on('acknowledge', function () {
-    self._resetPacket.send();
   });
 
-  var acknowledged = 0;
-  pkts.forEach(function (packet) {
-    // TODO: optimize by not having the following anonymous function redefined
-    //   at every iteration.
-    packet.on('acknowledge', function () {
-      acknowledged++;
-      if (acknowledged === pkts.length) {
-        emitter.emit('acknowledge');
-      }
-    });
-    packet.send();
-  });
+  this._synchronizationPacket.send();
 };
 
 Window.prototype.verifyAcknowledgement = function (sequenceNumber) {
@@ -109,11 +111,11 @@ function Sender(packetSender) {
  * @method
  */
 Sender.prototype.send = function (data) {
-  console.log('Got data to send.');
+  // console.log('Got data to send.');
   var chunks = helpers.splitArrayLike(data, constants.UDP_SAFE_SEGMENT_SIZE);
-  console.log('Got %s chunks', chunks.length);
+  // console.log('Got %s chunks', chunks.length);
   var windows = helpers.splitArrayLike(chunks, constants.WINDOW_SIZE);
-  console.log('Resulting in %s additional windows', windows.length);
+  // console.log('Resulting in %s additional windows', windows.length);
   this._windows = this._windows.concat(windows);
   this._push();
 }
@@ -124,11 +126,11 @@ Sender.prototype.send = function (data) {
 Sender.prototype._push = function () {
   var self = this;
   if (!this._sending && this._windows.length) {
-    console.log('No pending windows. Push the window awaiting in the queue');
+    // console.log('No pending windows. Push the window awaiting in the queue');
     this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
     var window = this._windows.shift()
     var toSend = new Window(window.map(function (data, i) {
-      var packet = new Packet(i + self._baseSequenceNumber, data, !!i, i === window.length - 1);
+      var packet = new Packet(i + self._baseSequenceNumber, data, !i, i === window.length - 1);
       return new PendingPacket(packet, self._packetSender);
     }));
     this._sending = toSend;

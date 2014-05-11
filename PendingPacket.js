@@ -11,13 +11,18 @@ var util = require('util');
  */
 module.exports = PendingPacket;
 function PendingPacket(packet, packetSender) {
+  this._packetSender = packetSender;
   this._packet = packet;
-  this._intervalID = setInterval(function () {
-    packetSender.send(packet);
-  }, constants.TIMEOUT);
 }
 
 util.inherits(PendingPacket, EventEmitter);
+
+PendingPacket.prototype.send = function () {
+  var self = this;
+  this._intervalID = setInterval(function () {
+    self._packetSender.send(self._packet);
+  }, constants.TIMEOUT);
+};
 
 PendingPacket.prototype.getSequenceNumber = function () {
   return this._packet.getSequenceNumber();

@@ -7,22 +7,25 @@ module.exports = Connection;
 function Connection(packetSender) {
   this._sender = new Sender(packetSender);
   this._receiver = new Receiver(packetSender);
+
+  var self = this;
+  this._receiver.on('data', function (data) {
+    self.emit('data', data)
+  });
 };
 
 util.inherits(Connection, EventEmitter);
 
 Connection.prototype.send = function (data) {
-  console.log('Sending data.');
+  // console.log('Sending data.');
   this._sender.send(data);
 };
 
 Connection.prototype.receive = function (packet) {
-  console.log('Got a packet.');
+  // console.log('Got a packet.');
   if (packet.getIsAcknowledgement()) {
-    console.log('This is an acknowledgement packet');
     this._sender.verifyAcknowledgement(packet.getSequenceNumber());
   } else {
-    console.log('This is a regular packet');
     this._receiver.receive(packet);
   }
 };

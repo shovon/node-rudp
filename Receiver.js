@@ -40,11 +40,12 @@ Receiver.prototype.receive = function (packet) {
     // increment the next expected packet.
     this._packets.clear();
     this.emit('data', packet.getPayload());
-    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+    this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
     this._packets.insert(packet);
     this._nextSequenceNumber = packet.getSequenceNumber() + 1;
     this._synced = true;
     this._syncSequenceNumber = packet.getSequenceNumber();
+
 
     if (packet.getIsReset()) {
       this.emit('_reset');
@@ -97,7 +98,7 @@ Receiver.prototype.receive = function (packet) {
 Receiver.prototype._pushIfExpectedSequence = function (packet) {
   if (packet.getSequenceNumber() === this._nextSequenceNumber) {
     this.emit('data', packet.getPayload());
-    this._packetSender.sendPacket(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+    this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
     this._nextSequenceNumber++;
     this._packets.seek();
     if (this._packets.hasNext()) {
