@@ -3,7 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
 /**
- * A placeholder for a packet that is awaiting a acknowledgement from the end
+ * A placeholder for a packet that is awaiting an acknowledgement from the end
  * host.
  *
  * @class PendingPacket
@@ -22,6 +22,7 @@ PendingPacket.prototype.send = function () {
   this._intervalID = setInterval(function () {
     self._packetSender.send(self._packet);
   }, constants.TIMEOUT);
+  self._packetSender.send(self._packet);
 };
 
 PendingPacket.prototype.getSequenceNumber = function () {

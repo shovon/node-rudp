@@ -6,6 +6,7 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
 // TODO: the sender should never send acknowledgement or finish packets.
+// TODO: have the ability to cancel the transfer of any pending packet.
 
 function Window(packets) {
   this._packets = packets;
@@ -62,9 +63,6 @@ Window.prototype.send = function () {
 
     // And if there are more than two packets in this window, then send all
     // other packets.
-    pkts.forEach(function (packet) {
-      packet.send();
-    });
 
     var acknowledged = 0;
     pkts.forEach(function (packet) {
