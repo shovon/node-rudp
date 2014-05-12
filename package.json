@@ -14,9 +14,7 @@
     "unit-test": "./node_modules/mocha/bin/mocha ./test/unit",
     "integration-test": "./node_modules/mocha/bin/mocha ./test/integration"
   },
-  "main": {
-    "./lib/index.js"
-  },
+  "main": "./lib/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/shovon/node-rudp.git"
