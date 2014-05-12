@@ -1,1 +1,5 @@
-This is an implementation of the [Go-Back-N](http://en.wikipedia.org/wiki/Go-Back-N_ARQ) protocol for Node.js.
+# rudp
+
+Reliable UDP implementation for Node.js.
+
+This is still a work in progress, but if you're interested into trying this out, then check out the "server" and "client" classes.
