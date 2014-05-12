@@ -3,11 +3,11 @@ var dgram = require('dgram');
 
 var socket = dgram.createSocket('udp4');
 
-var client = new rudp.Client(socket, '127.0.0.1', 5000);
+var client = new rudp.Client(socket, 'someaddress', 5000);
 
-process.stdout.resume();
+process.stdin.resume();
 
-process.stdout.on('data', function (data) {
+process.stdin.on('data', function (data) {
   client.send(data);
 });
 
