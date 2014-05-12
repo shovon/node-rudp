@@ -1,4 +1,4 @@
-var helpers = require('../../helpers.js');
+var helpers = require('../../lib/helpers.js');
 var expect = require('expect.js');
 
 describe('splitArrayLike', function () {

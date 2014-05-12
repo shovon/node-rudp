@@ -1,4 +1,4 @@
-var Packet = require('../../Packet');
+var Packet = require('../../lib/Packet');
 var expect = require('expect.js');
 
 describe('Packet', function () {
