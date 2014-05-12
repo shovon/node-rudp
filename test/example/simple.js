@@ -23,8 +23,13 @@ server.on('connection', function (connection) {
   connection.on('data', function (data) {
     console.log(data.toString('utf8'));
   });
+
+  connection.send(new Buffer('Hello, Client!'));
+});
+
+client.on('data', function (data) {
+  console.log('Client: %s', data.toString('utf8'));
 });
 
 client.send(new Buffer('Hello, World!'));
 client.send(new Buffer('How are you doing?'));
-// client.close();
