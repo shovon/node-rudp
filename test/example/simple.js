@@ -4,8 +4,6 @@ var dgram = require('dgram');
 var serverSocket = dgram.createSocket('udp4');
 var clientSocket = dgram.createSocket('udp4');
 
-// console.log('Initialized the sockets')
-
 serverSocket.bind(3001);
 
 console.log('Bound the server socket to port 3001');

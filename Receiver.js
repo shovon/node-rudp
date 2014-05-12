@@ -26,6 +26,8 @@ Receiver.prototype.receive = function (packet) {
     return;
   }
 
+  // console.log(packet.toObject());
+
   // TODO: ignore packets that have a sequence number less than the next
   // sequence number
 
@@ -33,6 +35,7 @@ Receiver.prototype.receive = function (packet) {
     // This is the beginning of the stream.
 
     if (packet.getSequenceNumber() === this._syncSequenceNumber) {
+      this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
       return;
     }
 

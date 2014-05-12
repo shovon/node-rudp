@@ -24,7 +24,7 @@ describe('Receiver', function () {
 
     it('should deliver a single packet upstream just fine', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var dummyData = 'Hello, World! This is a test!';
@@ -34,7 +34,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(dummyData);
-        expect(spySender.sendPacket.callCount).to.be(1);
+        expect(spySender.send.callCount).to.be(1);
         done();
       });
       receiver.receive(new Packet(0, new Buffer(dummyData), true));
@@ -43,7 +43,7 @@ describe('Receiver', function () {
 
     it('should deliver multiple unordered packets upstream just fine, and in order', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var dummyData = 'Hello, World! HA';
@@ -62,7 +62,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(dummyData);
-        expect(spySender.sendPacket.callCount).to.be(16);
+        expect(spySender.send.callCount).to.be(16);
         done();
       });
       packets.forEach(function (packet) {
@@ -73,7 +73,7 @@ describe('Receiver', function () {
 
     it('should deliver multiple unordered packets upstream just fine, and in order, even with a non-zero intial sequence number.', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var dummyData = 'Hello, World! HA';
@@ -92,7 +92,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(dummyData);
-        expect(spySender.sendPacket.callCount).to.be(16);
+        expect(spySender.send.callCount).to.be(16);
         done();
       });
       packets.forEach(function (packet) {
@@ -103,7 +103,7 @@ describe('Receiver', function () {
 
     it('should handle duplicate synchronize packets just fine', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var dummyData = 'Hello, World! HA';
@@ -124,7 +124,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(dummyData);
-        expect(spySender.sendPacket.callCount).to.be(17);
+        expect(spySender.send.callCount).to.be(17);
         done();
       });
       packets.forEach(function (packet) {
@@ -135,7 +135,7 @@ describe('Receiver', function () {
 
     it('should handle duplicate packets just fine', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       }
       var receiver = new Receiver(spySender);
       var dummyData = 'Hello, World! HA';
@@ -156,7 +156,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(dummyData);
-        expect(spySender.sendPacket.callCount).to.be(17);
+        expect(spySender.send.callCount).to.be(17);
         done();
       });
       packets.forEach(function (packet) {
@@ -167,7 +167,7 @@ describe('Receiver', function () {
 
     it('should be able to handle resets and synchronization', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var expected = 'Hello, World! This is a test!';
@@ -193,7 +193,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(expected);
-        expect(spySender.sendPacket.callCount).to.be(expected.length);
+        expect(spySender.send.callCount).to.be(expected.length);
         done();
       });
       windows.forEach(function (window) {
@@ -206,7 +206,7 @@ describe('Receiver', function () {
 
     it('should handle duplicate reset packets', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var expected = 'Hello, World! This is a test!';
@@ -234,7 +234,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(expected);
-        expect(spySender.sendPacket.callCount).to.be(expected.length + 2);
+        expect(spySender.send.callCount).to.be(expected.length + 2);
         done();
       });
       windows.forEach(function (window) {
@@ -247,7 +247,7 @@ describe('Receiver', function () {
 
     it('should be able to accept singleton windows', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var expected = 'Hello, World!';
@@ -271,7 +271,7 @@ describe('Receiver', function () {
 
     it('should be able to accept duplicate singletons', function (done) {
       var spySender = {
-        sendPacket: sinon.spy()
+        send: sinon.spy()
       };
       var receiver = new Receiver(spySender);
       var expected = 'Hello, World!';
@@ -291,6 +291,7 @@ describe('Receiver', function () {
       });
       receiver.on('end', function () {
         expect(compiled).to.be(expected);
+        expect(spySender.send.callCount).to.be(windows.length);
         done();
       });
       windows.forEach(function (packet) {

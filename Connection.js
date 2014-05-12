@@ -17,7 +17,6 @@ function Connection(packetSender) {
 util.inherits(Connection, EventEmitter);
 
 Connection.prototype.send = function (data) {
-  // console.log('Sending data.');
   this._sender.send(data);
 };
 

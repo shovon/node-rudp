@@ -98,7 +98,6 @@ Packet.prototype.clone = function () {
 
 Packet.prototype.toObject = function () {
   return {
-    version: this.getVersionNumber(),
     acknowledgement: this.getIsAcknowledgement(),
     synchronize: this.getIsSynchronize(),
     finish: this.getIsFinish(),
