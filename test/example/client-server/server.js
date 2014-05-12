@@ -5,7 +5,7 @@ var socket = dgram.createSocket('udp4');
 
 socket.bind(5000);
 
-var server = new gobackn.Server(socket, '127.0.0.1', 5000);
+var server = new gobackn.Server(socket);
 
 process.stdout.resume();
 
