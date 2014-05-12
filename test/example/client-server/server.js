@@ -1,11 +1,11 @@
-var gobackn = require('gobackn');
+var rudp = require('rudp');
 var dgram = require('dgram');
 
 var socket = dgram.createSocket('udp4');
 
 socket.bind(5000);
 
-var server = new gobackn.Server(socket);
+var server = new rudp.Server(socket);
 
 process.stdout.resume();
 

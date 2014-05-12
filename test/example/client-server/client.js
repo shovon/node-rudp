@@ -1,9 +1,9 @@
-var gobackn = require('gobackn');
+var rudp = require('rudp');
 var dgram = require('dgram');
 
 var socket = dgram.createSocket('udp4');
 
-var client = new gobackn.Client(socket, '127.0.0.1', 5000);
+var client = new rudp.Client(socket, '127.0.0.1', 5000);
 
 process.stdout.resume();
 
