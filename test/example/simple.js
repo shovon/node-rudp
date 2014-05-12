@@ -1,4 +1,4 @@
-var gobackn = require('../../');
+var gobackn = require('../../lib');
 var dgram = require('dgram');
 
 var serverSocket = dgram.createSocket('udp4');
