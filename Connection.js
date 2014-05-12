@@ -3,6 +3,8 @@ var Receiver = require('./Receiver');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
+// TODO: have connections refuse packets when closed.
+
 module.exports = Connection;
 function Connection(packetSender) {
   this._sender = new Sender(packetSender);
