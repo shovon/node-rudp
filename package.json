@@ -1,0 +1,33 @@
+{
+  "name": "rudp",
+  "version": "1.0.0-alpha3",
+  "description": "Reliable UDP implementation for Node.js",
+  "homepage": "https://github.com/shovon/node-rudp",
+  "author": {
+    "name": "Salehen Shovon Rahman",
+    "email": "salehen.rahman@mgmail.com",
+    "url": "http://shovon.github.io"
+  },
+  "scripts": {
+    "gendoc": "./node_modules/yuidocjs/lib/cli.js .",
+    "viewdoc": "./node_modules/yuidocjs/lib/cli.js . --server 4000",
+    "test": "./node_modules/mocha/bin/mocha",
+    "unit-test": "./node_modules/mocha/bin/mocha ./test/unit",
+    "integration-test": "./node_modules/mocha/bin/mocha ./test/integration"
+  },
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/shovon/node-rudp.git"
+  },
+  "devDependencies": {
+    "yuidocjs": "^0.3.50",
+    "mocha": "^1.18.2",
+    "expect.js": "^0.3.1",
+    "sinon": "^1.9.1"
+  },
+  "dependencies": {
+    "buffertools": "^2.1.2"
+  },
+  "license": "MIT"
+}
