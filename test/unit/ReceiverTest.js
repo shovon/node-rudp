@@ -299,5 +299,36 @@ describe('Receiver', function () {
       });
       receiver.end();
     });
+  
+    it('should ignore packets that have a sequence number less than the next sequence number', function (done) {
+      var spySender = {
+        send: sinon.spy()
+      };
+      var receiver = new Receiver(spySender);
+      var expected = 'Hello, World!';
+      var dummyData = expected.split('');
+      var packets = dummyData.map(function (packet, i) {
+        return new Packet(i + 10, new Buffer(packet), i === 0, i === dummyData.length - 1);
+      });
+      var compiled = '';
+      var packets = packets
+        .slice(0, Math.floor(packets.length / 2))
+        .concat([new Packet(0, new Buffer('test'), false, false)])
+        .concat(
+          packets.slice(Math.floor(packets.length / 2))
+        );
+      receiver.on('data', function (data) {
+        compiled += data;
+      });
+      receiver.on('end', function () {
+        expect(spySender.send.callCount).to.be(packets.length - 1);
+        done();
+      });
+      packets.forEach(function (packet) {
+        receiver.receive(packet);
+      });
+      receiver.end();
+    });
+
   });
 });
