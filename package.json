@@ -1,6 +1,6 @@
 {
   "name": "rudp",
-  "version": "1.0.0-alpha2",
+  "version": "1.0.0-alpha3",
   "description": "Reliable UDP implementation for Node.js",
   "homepage": "https://github.com/shovon/node-rudp",
   "author": {
