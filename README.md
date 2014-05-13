@@ -8,7 +8,7 @@ What's that? You ask why not just TCP? Yeah, you're right, TCP is a much easier 
 
 For a peer-to-peer application, you can write a script like this:
 
-```
+```javascript
 var rudp = require('rudp');
 var dgram = require('dgram');
 
