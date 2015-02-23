@@ -2,8 +2,6 @@
 
 Reliable UDP implementation for Node.js.
 
-What's that? You ask why not just TCP? Yeah, you're right, TCP is a much easier option, but if you want to traverse a NAT, doing so with TCP is just so much more harder. So the only use case--that I can think of--for reliable UDP is NAT traversal.
-
 ## Example
 
 For a peer-to-peer application, you can write a script like this:
