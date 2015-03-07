@@ -1,11 +1,11 @@
 {
   "name": "rudp",
-  "version": "1.0.0-alpha3",
+  "version": "1.0.0-alpha4",
   "description": "Reliable UDP implementation for Node.js",
   "homepage": "https://github.com/shovon/node-rudp",
   "author": {
     "name": "Salehen Shovon Rahman",
-    "email": "salehen.rahman@mgmail.com",
+    "email": "sal@linux.com",
     "url": "http://shovon.github.io"
   },
   "scripts": {
