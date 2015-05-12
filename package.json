@@ -27,7 +27,7 @@
     "sinon": "^1.9.1"
   },
   "dependencies": {
-    "buffertools": "^2.1.2"
+    "buffer-equal": "0.0.1"
   },
   "license": "MIT"
 }
